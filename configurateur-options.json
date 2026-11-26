@@ -1,0 +1,152 @@
+{
+  "customDimensionRate": {
+    "baseWidthCm": 73,
+    "baseHeightCm": 204,
+    "perCmDA": 150
+  },
+  "colors": [
+    {
+      "name": "Chêne Naturel",
+      "hex": "#b48352",
+      "textureUrl": "./images/finitions/chene-naturel.jpg",
+      "patternMode": "cover",
+      "priceDA": 0,
+      "default": true
+    },
+    {
+      "name": "Noyer Foncé",
+      "hex": "#4a2e1b",
+      "textureUrl": "./images/finitions/noyer-fonce.jpg",
+      "patternMode": "cover",
+      "priceDA": 1500,
+      "default": false
+    },
+    {
+      "name": "Blanc Satiné",
+      "hex": "#f5f5f4",
+      "textureUrl": "./images/finitions/Blanc-satiné.jpg",
+      "patternMode": "cover",
+      "priceDA": 1000,
+      "default": false
+    },
+    {
+      "name": "Gris Anthracite",
+      "hex": "#374151",
+      "textureUrl": "./images/finitions/gris-anthracite.jpg",
+      "patternMode": "cover",
+      "priceDA": 2000,
+      "default": false
+    },
+    {
+      "name": "Teck Doré",
+      "hex": "#a16207",
+      "textureUrl": "./images/finitions/teck-dore.jpg",
+      "patternMode": "cover",
+      "priceDA": 1500,
+      "default": false
+    },
+    {
+      "name": "Wengé Noir",
+      "hex": "#291d18",
+      "textureUrl": "./images/finitions/wenge-noir.jpg",
+      "patternMode": "cover",
+      "priceDA": 2500,
+      "default": false
+    }
+  ],
+  "dimensions": [
+    {
+      "id": "dim-73x204ss",
+      "value": "73 x 204 cm (Standard SDB/Chambre)",
+      "label": "73 x 204 cm (Standard SDB/Chambre)",
+      "widthCm": 73,
+      "heightCm": 204,
+      "supplementDA": 0,
+      "default": true
+    },
+    {
+      "id": "dim-83x204",
+      "value": "83 x 204 cm (Standard Pièce de vie)",
+      "label": "83 x 204 cm (Standard Pièce de vie) — +1 501 DA",
+      "widthCm": 83,
+      "heightCm": 204,
+      "supplementDA": 1501,
+      "default": false
+    },
+    {
+      "id": "dim-93x204",
+      "value": "93 x 204 cm (Large / PMR)",
+      "label": "93 x 204 cm (Large / PMR) — +3 000 DA",
+      "widthCm": 93,
+      "heightCm": 204,
+      "supplementDA": 3000,
+      "default": false
+    },
+    {
+      "id": "dim-90x215",
+      "value": "90 x 215 cm (Grande hauteur)",
+      "label": "90 x 215 cm (Grande hauteur) — +4 500 DA",
+      "widthCm": 90,
+      "heightCm": 215,
+      "supplementDA": 4500,
+      "default": false
+    }
+  ],
+  "openingDirections": [
+    {
+      "id": "poussant-droit",
+      "value": "Poussant Droit",
+      "label": "Poussant Droit",
+      "default": true
+    },
+    {
+      "id": "poussant-gauche",
+      "value": "Poussant Gauche",
+      "label": "Poussant Gauche",
+      "default": false
+    },
+    {
+      "id": "coulissante",
+      "value": "Coulissante",
+      "label": "Coulissante",
+      "default": false
+    }
+  ],
+  "handles": [
+    {
+      "id": "aucun",
+      "value": "Aucun",
+      "label": "Aucun",
+      "supplementDA": 0,
+      "default": true
+    },
+    {
+      "id": "inox-brosse",
+      "value": "Poignée inox brossé",
+      "label": "Poignée inox brossé — +2 000 DA",
+      "supplementDA": 2000,
+      "default": false
+    },
+    {
+      "id": "noir-mat",
+      "value": "Poignée noir mat",
+      "label": "Poignée noir mat — +2 500 DA",
+      "supplementDA": 2500,
+      "default": false
+    },
+    {
+      "id": "doree-laiton",
+      "value": "Poignée dorée / laiton",
+      "label": "Poignée dorée / laiton — +3 500 DA",
+      "supplementDA": 3500,
+      "default": false
+    },
+    {
+      "id": "serrure-cle",
+      "value": "Serrure à clé / condamnation",
+      "label": "Serrure à clé / condamnation — +1 800 DA",
+      "supplementDA": 1800,
+      "default": false
+    }
+  ]
+}

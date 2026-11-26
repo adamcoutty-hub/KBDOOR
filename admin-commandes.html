@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestion des commandes | KBDOOR</title>
+  <script src="./supabase-config.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="min-h-screen bg-stone-50 text-stone-800">
+  <main class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <h1 class="mb-2 text-3xl font-bold text-stone-900">Gestion des commandes</h1>
+    <p class="mb-8 text-stone-600">Connectez-vous avec un compte Supabase autorisé comme administrateur.</p>
+
+    <section id="login-panel" class="max-w-md rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+      <h2 class="mb-5 text-xl font-semibold">Connexion administrateur</h2>
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label for="email" class="mb-1 block text-sm font-semibold">Adresse e-mail</label>
+          <input id="email" type="email" autocomplete="username" required class="w-full rounded-xl border border-stone-300 px-4 py-3" />
+        </div>
+        <div>
+          <label for="password" class="mb-1 block text-sm font-semibold">Mot de passe</label>
+          <input id="password" type="password" autocomplete="current-password" required class="w-full rounded-xl border border-stone-300 px-4 py-3" />
+        </div>
+        <button class="w-full rounded-xl bg-amber-700 px-4 py-3 font-bold text-white hover:bg-amber-600">Se connecter</button>
+      </form>
+    </section>
+
+    <section id="orders-panel" class="hidden">
+      <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <p id="admin-identity" class="text-sm text-stone-600"></p>
+        <div class="flex gap-3">
+          <button id="refresh-orders" type="button" class="rounded-lg border border-stone-300 px-4 py-2 text-sm font-semibold hover:bg-stone-100">Actualiser</button>
+          <button id="sign-out" type="button" class="rounded-lg border border-stone-300 px-4 py-2 text-sm font-semibold hover:bg-stone-100">Déconnexion</button>
+        </div>
+      </div>
+      <div class="overflow-x-auto rounded-2xl border border-stone-200 bg-white shadow-sm">
+        <table class="w-full min-w-[850px] text-left text-sm">
+          <thead class="bg-stone-100 text-stone-700">
+            <tr>
+              <th class="px-4 py-3">Commande</th>
+              <th class="px-4 py-3">Date</th>
+              <th class="px-4 py-3">Client / Téléphone</th>
+              <th class="px-4 py-3">Wilaya</th>
+              <th class="px-4 py-3">Total</th>
+              <th class="px-4 py-3">Statut</th>
+              <th class="px-4 py-3">Action</th>
+            </tr>
+          </thead>
+          <tbody id="orders-list" class="divide-y divide-stone-100"></tbody>
+        </table>
+      </div>
+    </section>
+    <p id="feedback" role="status" aria-live="polite" class="mt-5 text-sm"></p>
+  </main>
+
+  <script>
+    (function () {
+      const config = window.KBDOOR_SUPABASE_CONFIG;
+      const loginPanel = document.getElementById('login-panel');
+      const ordersPanel = document.getElementById('orders-panel');
+      const feedback = document.getElementById('feedback');
+      const ordersList = document.getElementById('orders-list');
+      const statuses = [
+        'Commande reçue - en attente de confirmation',
+        'Confirmée',
+        'En préparation',
+        'Expédiée',
+        'Livrée',
+        'Annulée'
+      ];
+      let client = null;
+      let currentUser = null;
+
+      function showFeedback(message, isError) {
+        feedback.textContent = message;
+        feedback.className = 'mt-5 text-sm ' + (isError ? 'text-red-700' : 'text-emerald-700');
+      }
+
+      function setSignedInUser(user) {
+        currentUser = user;
+        const isAdmin = Boolean(user && user.app_metadata && user.app_metadata.role === 'admin');
+        loginPanel.classList.toggle('hidden', isAdmin);
+        ordersPanel.classList.toggle('hidden', !isAdmin);
+        document.getElementById('admin-identity').textContent = isAdmin
+          ? 'Connecté en tant que ' + (user.email || 'administrateur')
+          : '';
+
+        if (user && !isAdmin) {
+          showFeedback('Ce compte n’a pas les droits administrateur. Demandez à un administrateur de lui attribuer le rôle requis.', true);
+        } else if (!user) {
+          ordersList.replaceChildren();
+        } else {
+          showFeedback('', false);
+          loadOrders();
+        }
+      }
+
+      async function loadOrders() {
+        if (!client || !currentUser || currentUser.app_metadata.role !== 'admin') return;
+        showFeedback('Chargement des commandes…', false);
+        const { data, error } = await client.rpc('admin_lister_commandes');
+        if (error) {
+          console.error('Erreur de chargement des commandes :', error);
+          showFeedback('Impossible de charger les commandes : ' + error.message, true);
+          return;
+        }
+
+        ordersList.replaceChildren();
+        for (const order of data || []) {
+          const row = document.createElement('tr');
+          const values = [order.id, order.date, (order.client || '') + ' / ' + (order.phone || ''), order.wilaya, order.total];
+          for (const value of values) {
+            const cell = document.createElement('td');
+            cell.className = 'px-4 py-3 align-top';
+            cell.textContent = value || '';
+            row.appendChild(cell);
+          }
+
+          const statusCell = document.createElement('td');
+          statusCell.className = 'px-4 py-3';
+          const select = document.createElement('select');
+          select.className = 'rounded-lg border border-stone-300 px-3 py-2';
+          for (const status of statuses) {
+            const option = document.createElement('option');
+            option.value = status;
+            option.textContent = status;
+            option.selected = status === order.status;
+            select.appendChild(option);
+          }
+          statusCell.appendChild(select);
+          row.appendChild(statusCell);
+
+          const actionCell = document.createElement('td');
+          actionCell.className = 'px-4 py-3';
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'rounded-lg bg-amber-700 px-3 py-2 font-semibold text-white hover:bg-amber-600';
+          button.textContent = 'Enregistrer';
+          button.addEventListener('click', async function () {
+            button.disabled = true;
+            const { error: updateError } = await client.rpc('admin_modifier_statut_commande', {
+              p_id: order.id,
+              p_status: select.value
+            });
+            button.disabled = false;
+            if (updateError) {
+              console.error('Erreur de mise à jour du statut :', updateError);
+              showFeedback('Impossible de modifier le statut : ' + updateError.message, true);
+              return;
+            }
+            showFeedback('Statut de la commande ' + order.id + ' mis à jour.', false);
+            order.status = select.value;
+          });
+          actionCell.appendChild(button);
+          row.appendChild(actionCell);
+          ordersList.appendChild(row);
+        }
+        if (data && data.length === 0) showFeedback('Aucune commande enregistrée.', false);
+        else showFeedback('Les 200 dernières commandes au maximum sont affichées.', false);
+      }
+
+      if (!config || !config.url || !config.anonKey || !window.supabase) {
+        showFeedback('Configuration Supabase manquante ou SDK indisponible.', true);
+        document.getElementById('login-form').querySelector('button').disabled = true;
+        return;
+      }
+
+      client = window.supabase.createClient(config.url, config.anonKey);
+      document.getElementById('login-form').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        showFeedback('Connexion en cours…', false);
+        const { data, error } = await client.auth.signInWithPassword({
+          email: document.getElementById('email').value.trim(),
+          password: document.getElementById('password').value
+        });
+        if (error) {
+          showFeedback('Connexion impossible : ' + error.message, true);
+          return;
+        }
+        setSignedInUser(data.user);
+      });
+
+      document.getElementById('sign-out').addEventListener('click', async function () {
+        const { error } = await client.auth.signOut();
+        if (error) {
+          showFeedback('Déconnexion impossible : ' + error.message, true);
+          return;
+        }
+        setSignedInUser(null);
+      });
+      document.getElementById('refresh-orders').addEventListener('click', loadOrders);
+
+      client.auth.getSession().then(function ({ data, error }) {
+        if (error) {
+          showFeedback('Impossible de vérifier la session : ' + error.message, true);
+          return;
+        }
+        setSignedInUser(data.session && data.session.user);
+      });
+      client.auth.onAuthStateChange(function (_event, session) {
+        setSignedInUser(session && session.user);
+      });
+    })();
+  </script>
+</body>
+</html>
